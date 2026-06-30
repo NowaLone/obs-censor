@@ -4,7 +4,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/common/bootstrap.cmake" NO_POLICY_SCO
 
 project(${_name} VERSION ${_version})
 
-option(ENABLE_FRONTEND_API "Use obs-frontend-api for UI functionality" OFF)
+option(ENABLE_FRONTEND_API "Use obs-frontend-api for UI functionality" ON)
 option(ENABLE_QT "Use Qt functionality" OFF)
 
 include(compilerconfig)
@@ -26,7 +26,7 @@ if(ENABLE_QT)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Core Qt6::Widgets)
   target_compile_options(
     ${CMAKE_PROJECT_NAME}
-    PRIVATE $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-quoted-include-in-framework-header -Wno-comma>
+    PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang>:-Wno-quoted-include-in-framework-header -Wno-comma>
   )
   set_target_properties(
     ${CMAKE_PROJECT_NAME}
@@ -34,6 +34,20 @@ if(ENABLE_QT)
   )
 endif()
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.c)
+# Windows specific: link wininet
+if(WIN32)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE wininet)
+endif()
+
+# Linux specific: link curl
+if(UNIX AND NOT APPLE)
+  find_package(CURL REQUIRED)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE CURL::libcurl)
+endif()
+
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.cpp)
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-support.c)
+
+configure_file(src/plugin-support.c.in src/plugin-support.c @ONLY)
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
