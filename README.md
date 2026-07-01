@@ -1,59 +1,179 @@
-# OBS Plugin Template
+# obs-censor
 
-## Introduction
+English | [Русский](README.ru-RU.md)
 
-The plugin template is meant to be used as a starting point for OBS Studio plugin development. It includes:
+`obs-censor` is an OBS Studio filter plugin that automatically hides or shows the source it is attached to based on MPC-BE playback time.
 
-* Boilerplate plugin source code
-* A CMake project file
-* GitHub Actions workflows and repository actions
+> Note: this plugin was created with AI assistance.
 
-## Supported Build Environments
+This plugin works as a **source filter**:
 
-| Platform  | Tool   |
-|-----------|--------|
-| Windows   | Visual Studio 17 2022 |
-| macOS     | XCode 16.0 |
-| Windows, macOS  | CMake 3.30.5 |
-| Ubuntu 24.04 | CMake 3.28.3 |
-| Ubuntu 24.04 | `ninja-build` |
-| Ubuntu 24.04 | `pkg-config`
-| Ubuntu 24.04 | `build-essential` |
+- you attach it directly to the source you want to control;
+- it polls MPC-BE's `variables.html` endpoint;
+- it checks the current playback time against configured timing intervals;
+- it **shows** the source during matching intervals and **hides** it outside them.
 
-## Quick Start
+## Features
 
-An absolute bare-bones [Quick Start Guide](https://github.com/obsproject/obs-plugintemplate/wiki/Quick-Start-Guide) is available in the wiki.
+- OBS source filter for timing-based source visibility control
+- MPC-BE playback sync through HTTP (`variables.html`)
+- Multiple timing ranges in `HH:MM:SS-HH:MM:SS` format
+- Automatic correction of reversed ranges such as `01:28:19-01:26:21`
+- Signed timing offset support in `+/-HH:MM:SS` format
+- English and Russian localization (`en-US`, `ru-RU`)
+- Windows support via WinINet and Linux support via libcurl
 
-## Documentation
+## How it works
 
-All documentation can be found in the [Plugin Template Wiki](https://github.com/obsproject/obs-plugintemplate/wiki).
+The filter runs a background worker that periodically requests the MPC-BE status page.
 
-Suggested reading to get up and running:
+It reads playback position from either:
 
-* [Getting started](https://github.com/obsproject/obs-plugintemplate/wiki/Getting-Started)
-* [Build system requirements](https://github.com/obsproject/obs-plugintemplate/wiki/Build-System-Requirements)
-* [Build system options](https://github.com/obsproject/obs-plugintemplate/wiki/CMake-Build-System-Options)
+- `<p id="positionstring">HH:MM:SS</p>`, or
+- `<p id="position">milliseconds</p>`
 
-## GitHub Actions & CI
+Then it:
 
-Default GitHub Actions workflows are available for the following repository actions:
+1. parses your configured timing intervals;
+2. applies the optional timing offset;
+3. checks whether the adjusted playback time is inside any interval;
+4. renders the source only when the time matches.
 
-* `push`: Run for commits or tags pushed to `master` or `main` branches.
-* `pr-pull`: Run when a Pull Request has been pushed or synchronized.
-* `dispatch`: Run when triggered by the workflow dispatch in GitHub's user interface.
-* `build-project`: Builds the actual project and is triggered by other workflows.
-* `check-format`: Checks CMake and plugin source code formatting and is triggered by other workflows.
+### Visibility logic
 
-The workflows make use of GitHub repository actions (contained in `.github/actions`) and build scripts (contained in `.github/scripts`) which are not needed for local development, but might need to be adjusted if additional/different steps are required to build the plugin.
+- **Inside** a configured interval -> source is visible
+- **Outside** all configured intervals -> source is hidden
+- **No URL or no timings configured** -> hiding is disabled and the source stays visible
 
-### Retrieving build artifacts
+> Note: this plugin currently controls **video visibility**. It does not mute or censor audio.
 
-Successful builds on GitHub Actions will produce build artifacts that can be downloaded for testing. These artifacts are commonly simple archives and will not contain package installers or installation programs.
+## OBS usage
 
-### Building a Release
+1. In MPC-BE, enable the web interface and make sure `variables.html` is reachable.
+   - Default URL: `http://localhost:13579/variables.html`
+2. In OBS Studio, open the source you want to control.
+3. Add the **MPC-BE Censor** filter to that source.
+4. Configure the filter settings.
 
-To create a release, an appropriately named tag needs to be pushed to the `main`/`master` branch using semantic versioning (e.g., `12.3.4`, `23.4.5-beta2`). A draft release will be created on the associated repository with generated installer packages or installation programs attached as release artifacts.
+## Filter settings
 
-## Signing and Notarizing on macOS
+### MPC-BE URL
 
-Basic concepts of codesigning and notarization on macOS are explained in the correspodning [Wiki article](https://github.com/obsproject/obs-plugintemplate/wiki/Codesigning-On-macOS) which has a specific section for the [GitHub Actions setup](https://github.com/obsproject/obs-plugintemplate/wiki/Codesigning-On-macOS#setting-up-code-signing-for-github-actions).
+The HTTP endpoint used to fetch playback position.
+
+Default:
+
+```text
+http://localhost:13579/variables.html
+```
+
+### Poll interval (ms)
+
+How often the filter checks MPC-BE.
+
+- Minimum: `500`
+- Maximum: `5000`
+- Default: `1000`
+
+### Timing offset
+
+Shifts all timings without editing the timing list itself.
+
+Accepted formats:
+
+- `+00:00:05`
+- `-00:00:05`
+- `00:01:30`
+- plain seconds such as `15` or `-15` are also accepted
+
+Behavior:
+
+- `+` delays the trigger
+- `-` advances the trigger
+
+Examples:
+
+- `+00:00:05` -> the source changes state 5 seconds later
+- `-00:00:05` -> the source changes state 5 seconds earlier
+
+### Timings
+
+Enter one or more time ranges in this format:
+
+```text
+00:03:45-00:03:49
+00:10:00-00:10:12
+01:28:19-01:26:21
+```
+
+The filter searches the text for timing ranges, so notes after a range are fine:
+
+```text
+00:03:45-00:03:49 - short censor
+00:10:00-00:10:12 - second scene
+```
+
+If a range is entered backwards, it is fixed automatically.
+
+## Build
+
+Windows build commands:
+
+```powershell
+cmake --preset windows-x64
+cmake --build --preset windows-x64 --config RelWithDebInfo
+```
+
+The main output is:
+
+```text
+build_x64/RelWithDebInfo/obs-censor.dll
+```
+
+The runnable local plugin layout created by the build is under:
+
+```text
+build_x64/rundir/RelWithDebInfo/
+```
+
+## Installation notes
+
+If you install the plugin manually, do **not** copy only the DLL.
+
+You also need the plugin data files, especially the locale files:
+
+```text
+obs-censor/locale/en-US.ini
+obs-censor/locale/ru-RU.ini
+```
+
+If the locale files are missing, OBS may show raw keys such as:
+
+```text
+MpcBeCensorFilter.Name
+MpcBeCensorFilter.Timings
+```
+
+For local testing, use the files produced in:
+
+```text
+build_x64/rundir/RelWithDebInfo/
+```
+
+## Localization
+
+Currently included:
+
+- English: `data/locale/en-US.ini`
+- Russian: `data/locale/ru-RU.ini`
+
+## Project info
+
+- Plugin name: `obs-censor`
+- OBS filter id: `mpc_be_censor_filter`
+- Display name: `OBS Censor Plugin`
+- Website: <https://github.com/NowaLone/obs-censor>
+
+## License
+
+This project is licensed under GPL v2 or later, matching the plugin source headers.
