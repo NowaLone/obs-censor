@@ -24,7 +24,7 @@
       "label": "Pre-Built Qt6",
       "hashes": {
         "macos": "d3f5f04b6ea486e032530bdf0187cbda9a54e0a49621a4c8ba984c5023998867",
-        "windows-x64": "0e76bf055dd5382838850b748d3dcfab44a1e1058441309ab54e1a65b156d0a"
+        "windows-x64": "0e76bf0555dd5382838850b748d3dcfab44a1e1058441309ab54e1a65b156d0a"
       },
       "debugSymbols": {
         "windows-x64": "11b7be92cf66a273299b8f3515c07a5cfb61614b59a4e67f7fc5ecba5e2bdf21"
