@@ -88,6 +88,17 @@ int time_to_seconds(int hours, int minutes, int seconds)
 	return hours * 3600 + minutes * 60 + seconds;
 }
 
+bool clock_parts_to_seconds(bool has_hours, int hours, int minutes, int seconds, int &total_seconds)
+{
+	if (seconds >= 60)
+		return false;
+	if (has_hours && minutes >= 60)
+		return false;
+
+	total_seconds = time_to_seconds(has_hours ? hours : 0, minutes, seconds);
+	return true;
+}
+
 int sub_match_to_int(const std::ssub_match &match)
 {
 	return std::atoi(match.str().c_str());
@@ -169,15 +180,19 @@ int parse_timing_offset_seconds(obs_data_t *settings)
 
 std::vector<TimeInterval> parse_timings(const std::string &text)
 {
-	static const std::regex pattern(R"((\d+):(\d+):(\d+)\s*-\s*(\d+):(\d+):(\d+))");
+	static const std::regex pattern(R"((?:(\d+):)?(\d+):(\d+)\s*-\s*(?:(\d+):)?(\d+):(\d+))");
 	std::vector<TimeInterval> intervals;
 
 	for (std::sregex_iterator it(text.begin(), text.end(), pattern), end; it != end; ++it) {
 		const std::smatch &match = *it;
-		int start_seconds =
-			time_to_seconds(sub_match_to_int(match[1]), sub_match_to_int(match[2]), sub_match_to_int(match[3]));
-		int end_seconds =
-			time_to_seconds(sub_match_to_int(match[4]), sub_match_to_int(match[5]), sub_match_to_int(match[6]));
+		int start_seconds = 0;
+		int end_seconds = 0;
+		if (!clock_parts_to_seconds(match[1].matched, sub_match_to_int(match[1]), sub_match_to_int(match[2]),
+			    sub_match_to_int(match[3]), start_seconds) ||
+			!clock_parts_to_seconds(match[4].matched, sub_match_to_int(match[4]), sub_match_to_int(match[5]),
+				sub_match_to_int(match[6]), end_seconds)) {
+			continue;
+		}
 
 		if (start_seconds > end_seconds)
 			std::swap(start_seconds, end_seconds);

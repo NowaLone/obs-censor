@@ -17,7 +17,7 @@ This plugin works as a **source filter**:
 
 - OBS source filter for timing-based source visibility control
 - MPC-BE playback sync through HTTP (`variables.html`)
-- Multiple timing ranges in `HH:MM:SS-HH:MM:SS` format
+- Multiple timing ranges in `HH:MM:SS-HH:MM:SS` or `MM:SS-MM:SS` format
 - Automatic correction of reversed ranges such as `01:28:19-01:26:21`
 - Signed timing offset support in `+/-HH:MM:SS` format
 - English and Russian localization (`en-US`, `ru-RU`)
@@ -98,12 +98,13 @@ Examples:
 
 ### Timings
 
-Enter one or more time ranges in this format:
+Enter one or more time ranges as `HH:MM:SS-HH:MM:SS` or `MM:SS-MM:SS`. Spaces around `-` are optional:
 
 ```text
 00:03:45-00:03:49
-00:10:00-00:10:12
-01:28:19-01:26:21
+11:25 - 11:28
+47:16- 47:57
+1:02:16-1:03:01
 ```
 
 The filter searches the text for timing ranges, so notes after a range are fine:
