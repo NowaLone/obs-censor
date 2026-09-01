@@ -453,13 +453,23 @@ void filter_defaults(obs_data_t *settings)
 obs_properties_t *filter_properties(void *)
 {
 	obs_properties_t *properties = obs_properties_create();
-	obs_properties_add_text(properties, kUrlSetting, obs_module_text("MpcBeCensorFilter.Url"), OBS_TEXT_DEFAULT);
-	obs_properties_add_int(properties, kPollIntervalSetting, obs_module_text("MpcBeCensorFilter.PollInterval"),
-		kMinimumPollIntervalMs, kMaximumPollIntervalMs, 100);
-	obs_properties_add_text(properties, kTimingOffsetSetting, obs_module_text("MpcBeCensorFilter.Offset"),
+
+	obs_property_t *url = obs_properties_add_text(properties, kUrlSetting, obs_module_text("MpcBeCensorFilter.Url"),
 		OBS_TEXT_DEFAULT);
-	obs_properties_add_text(properties, kTimingsSetting, obs_module_text("MpcBeCensorFilter.Timings"),
-		OBS_TEXT_MULTILINE);
+	obs_property_set_long_description(url, obs_module_text("MpcBeCensorFilter.Url.Description"));
+
+	obs_property_t *poll_interval = obs_properties_add_int(properties, kPollIntervalSetting,
+		obs_module_text("MpcBeCensorFilter.PollInterval"), kMinimumPollIntervalMs, kMaximumPollIntervalMs, 100);
+	obs_property_set_long_description(poll_interval, obs_module_text("MpcBeCensorFilter.PollInterval.Description"));
+
+	obs_property_t *offset = obs_properties_add_text(properties, kTimingOffsetSetting,
+		obs_module_text("MpcBeCensorFilter.Offset"), OBS_TEXT_DEFAULT);
+	obs_property_set_long_description(offset, obs_module_text("MpcBeCensorFilter.Offset.Description"));
+
+	obs_property_t *timings = obs_properties_add_text(properties, kTimingsSetting,
+		obs_module_text("MpcBeCensorFilter.Timings"), OBS_TEXT_MULTILINE);
+	obs_property_set_long_description(timings, obs_module_text("MpcBeCensorFilter.Timings.Description"));
+
 	return properties;
 }
 
