@@ -135,14 +135,13 @@ bool try_parse_offset_string(const std::string &text, int &offset_seconds)
 		if (match[1].matched && match[1].str() == "-")
 			offset_seconds = -offset_seconds;
 
-		offset_seconds =
-			std::clamp(offset_seconds, kMinimumTimingOffsetSeconds, kMaximumTimingOffsetSeconds);
+		offset_seconds = std::clamp(offset_seconds, kMinimumTimingOffsetSeconds, kMaximumTimingOffsetSeconds);
 		return true;
 	}
 
 	if (std::regex_match(text, match, seconds_pattern)) {
 		offset_seconds = std::clamp(std::atoi(match[1].str().c_str()), kMinimumTimingOffsetSeconds,
-			kMaximumTimingOffsetSeconds);
+					    kMaximumTimingOffsetSeconds);
 		return true;
 	}
 
@@ -172,7 +171,7 @@ int parse_timing_offset_seconds(obs_data_t *settings)
 	}
 
 	offset_seconds = std::clamp(static_cast<int>(obs_data_get_int(settings, kTimingOffsetSetting)),
-		kMinimumTimingOffsetSeconds, kMaximumTimingOffsetSeconds);
+				    kMinimumTimingOffsetSeconds, kMaximumTimingOffsetSeconds);
 	const std::string normalized = format_offset_time(offset_seconds);
 	obs_data_set_string(settings, kTimingOffsetSetting, normalized.c_str());
 	return offset_seconds;
@@ -188,9 +187,9 @@ std::vector<TimeInterval> parse_timings(const std::string &text)
 		int start_seconds = 0;
 		int end_seconds = 0;
 		if (!clock_parts_to_seconds(match[1].matched, sub_match_to_int(match[1]), sub_match_to_int(match[2]),
-			    sub_match_to_int(match[3]), start_seconds) ||
-			!clock_parts_to_seconds(match[4].matched, sub_match_to_int(match[4]), sub_match_to_int(match[5]),
-				sub_match_to_int(match[6]), end_seconds)) {
+					    sub_match_to_int(match[3]), start_seconds) ||
+		    !clock_parts_to_seconds(match[4].matched, sub_match_to_int(match[4]), sub_match_to_int(match[5]),
+					    sub_match_to_int(match[6]), end_seconds)) {
 			continue;
 		}
 
@@ -208,15 +207,15 @@ int parse_html_time(const std::string &html)
 	if (html.empty())
 		return -1;
 
-	static const std::regex position_string_pattern(
-		R"(<p\s+id="positionstring"[^>]*>\s*(\d+):(\d+):(\d+)\s*</p>)",
-		std::regex_constants::icase);
+	static const std::regex position_string_pattern(R"(<p\s+id="positionstring"[^>]*>\s*(\d+):(\d+):(\d+)\s*</p>)",
+							std::regex_constants::icase);
 	static const std::regex position_pattern(R"(<p\s+id="position"[^>]*>\s*(\d+)\s*</p>)",
-						     std::regex_constants::icase);
+						 std::regex_constants::icase);
 	std::smatch match;
 
 	if (std::regex_search(html, match, position_string_pattern)) {
-		return time_to_seconds(sub_match_to_int(match[1]), sub_match_to_int(match[2]), sub_match_to_int(match[3]));
+		return time_to_seconds(sub_match_to_int(match[1]), sub_match_to_int(match[2]),
+				       sub_match_to_int(match[3]));
 	}
 
 	if (std::regex_search(html, match, position_pattern))
@@ -374,7 +373,8 @@ void worker_loop(FilterData *filter)
 		filter->settings_dirty = false;
 
 		if (intervals.empty() || mpc_url.empty()) {
-			filter->condition.wait(lock, [filter]() { return filter->stop_requested || filter->settings_dirty; });
+			filter->condition.wait(lock,
+					       [filter]() { return filter->stop_requested || filter->settings_dirty; });
 			continue;
 		}
 
@@ -405,7 +405,7 @@ void worker_loop(FilterData *filter)
 
 		lock.lock();
 		filter->condition.wait_for(lock, std::chrono::milliseconds(poll_interval_ms),
-			[filter]() { return filter->stop_requested || filter->settings_dirty; });
+					   [filter]() { return filter->stop_requested || filter->settings_dirty; });
 	}
 }
 
@@ -455,19 +455,20 @@ obs_properties_t *filter_properties(void *)
 	obs_properties_t *properties = obs_properties_create();
 
 	obs_property_t *url = obs_properties_add_text(properties, kUrlSetting, obs_module_text("MpcBeCensorFilter.Url"),
-		OBS_TEXT_DEFAULT);
+						      OBS_TEXT_DEFAULT);
 	obs_property_set_long_description(url, obs_module_text("MpcBeCensorFilter.Url.Description"));
 
 	obs_property_t *poll_interval = obs_properties_add_int(properties, kPollIntervalSetting,
-		obs_module_text("MpcBeCensorFilter.PollInterval"), kMinimumPollIntervalMs, kMaximumPollIntervalMs, 100);
+							       obs_module_text("MpcBeCensorFilter.PollInterval"),
+							       kMinimumPollIntervalMs, kMaximumPollIntervalMs, 100);
 	obs_property_set_long_description(poll_interval, obs_module_text("MpcBeCensorFilter.PollInterval.Description"));
 
 	obs_property_t *offset = obs_properties_add_text(properties, kTimingOffsetSetting,
-		obs_module_text("MpcBeCensorFilter.Offset"), OBS_TEXT_DEFAULT);
+							 obs_module_text("MpcBeCensorFilter.Offset"), OBS_TEXT_DEFAULT);
 	obs_property_set_long_description(offset, obs_module_text("MpcBeCensorFilter.Offset.Description"));
 
-	obs_property_t *timings = obs_properties_add_text(properties, kTimingsSetting,
-		obs_module_text("MpcBeCensorFilter.Timings"), OBS_TEXT_MULTILINE);
+	obs_property_t *timings = obs_properties_add_text(
+		properties, kTimingsSetting, obs_module_text("MpcBeCensorFilter.Timings"), OBS_TEXT_MULTILINE);
 	obs_property_set_long_description(timings, obs_module_text("MpcBeCensorFilter.Timings.Description"));
 
 	return properties;
