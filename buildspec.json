@@ -38,7 +38,7 @@
   },
   "name": "obs-censor",
   "displayName": "OBS Censor Plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "NowaLone",
   "website": "https://github.com/NowaLone/obs-censor",
   "email": "me@example.com"
