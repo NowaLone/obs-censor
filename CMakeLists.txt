@@ -46,6 +46,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.cpp)
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/timing-parser.hpp)
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-support.c)
 
 configure_file(src/plugin-support.c.in src/plugin-support.c @ONLY)
