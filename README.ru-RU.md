@@ -138,16 +138,15 @@ build_x64/rundir/RelWithDebInfo/
 
 ## Установка
 
-Если устанавливаете плагин вручную, **не копируйте только DLL**.
-
-Нужны и файлы данных плагина, особенно файлы локализации:
+Скачайте Windows-архив из Releases и распакуйте его в каталог установки OBS Studio (например `C:\Program Files\obs-studio`). Архив использует раскладку OBS:
 
 ```text
-obs-censor/locale/en-US.ini
-obs-censor/locale/ru-RU.ini
+obs-plugins\64bit\obs-censor.dll
+data\obs-plugins\obs-censor\locale\en-US.ini
+data\obs-plugins\obs-censor\locale\ru-RU.ini
 ```
 
-Если файлов локализации нет, OBS может показывать сырые ключи вроде:
+Если устанавливаете плагин вручную, **не копируйте только DLL**. Нужны и файлы данных плагина, особенно файлы локализации. Если их нет, OBS может показывать сырые ключи вроде:
 
 ```text
 MpcBeCensorFilter.Name

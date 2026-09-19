@@ -10,7 +10,7 @@ include(buildspec)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(
     CMAKE_INSTALL_PREFIX
-    "$ENV{ALLUSERSPROFILE}/obs-studio/plugins"
+    "$ENV{ProgramFiles}/obs-studio"
     CACHE STRING
     "Default plugin installation directory"
     FORCE
