@@ -139,16 +139,15 @@ build_x64/rundir/RelWithDebInfo/
 
 ## Installation notes
 
-If you install the plugin manually, do **not** copy only the DLL.
-
-You also need the plugin data files, especially the locale files:
+Download the Windows zip from Releases and extract it into the OBS Studio installation directory (for example `C:\Program Files\obs-studio`). The archive uses the OBS overlay layout:
 
 ```text
-obs-censor/locale/en-US.ini
-obs-censor/locale/ru-RU.ini
+obs-plugins\64bit\obs-censor.dll
+data\obs-plugins\obs-censor\locale\en-US.ini
+data\obs-plugins\obs-censor\locale\ru-RU.ini
 ```
 
-If the locale files are missing, OBS may show raw keys such as:
+If you install the plugin manually, do **not** copy only the DLL. You also need the plugin data files, especially the locale files. If they are missing, OBS may show raw keys such as:
 
 ```text
 MpcBeCensorFilter.Name
