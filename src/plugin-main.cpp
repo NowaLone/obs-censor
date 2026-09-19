@@ -458,14 +458,9 @@ obs_properties_t *filter_properties(void *)
 						      OBS_TEXT_DEFAULT);
 	obs_property_set_long_description(url, obs_module_text("MpcBeCensorFilter.Url.Description"));
 
-	obs_property_t *poll_interval = obs_properties_add_list(properties, kPollIntervalSetting,
-								obs_module_text("MpcBeCensorFilter.PollInterval"),
-								OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
-	for (int ms = kMinimumPollIntervalMs; ms <= kMaximumPollIntervalMs; ms += 100) {
-		char label[16];
-		std::snprintf(label, sizeof(label), "%d", ms);
-		obs_property_list_add_int(poll_interval, label, ms);
-	}
+	obs_property_t *poll_interval = obs_properties_add_int(properties, kPollIntervalSetting,
+							       obs_module_text("MpcBeCensorFilter.PollInterval"),
+							       kMinimumPollIntervalMs, kMaximumPollIntervalMs, 100);
 	obs_property_set_long_description(poll_interval, obs_module_text("MpcBeCensorFilter.PollInterval.Description"));
 
 	obs_property_t *offset = obs_properties_add_text(properties, kTimingOffsetSetting,
